@@ -1,0 +1,23 @@
+TLN
+===
+
+TODO:
+- new entity creation: authoritative, especulative (needs to find a matching
+  authoritative within X time).
+  - registry for new entities
+  -
+  -
+- full entity creation sync (for new playes)
+
+- clock and ping sync
+
+
+IDEAS:
+- fixed time stamp for simulation (20hz?)
+- time sync + ping average subsystem
+- can be used with any pub/sub transport mechanism (Deepstream, WebRTC)
+
+
+WEBRTC:
+- https://github.com/feross/simple-peer
+- https://deepstreamhub.com/tutorials/protocols/webrtc-datachannels/

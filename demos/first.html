@@ -1,0 +1,247 @@
+<!doctype html>
+<head>
+<style>
+body { background-color: #222; }
+</style>
+<!-- <script src="libs/deepstream.js"></script> -->
+<script src="../../../libs/mix/out/mix.js"></script>
+<script src="../../../libs/so/out/so.js"></script>
+<script src="timeline.js"></script>
+</head>
+<body>
+  <canvas id="mix" width=1040 height=270></canvas>
+
+<script>
+var mix = window.mix = document.getElementById("mix").getContext("mix");
+var TEXTURE = null;
+let players = 4;
+let real_players = 3;
+let GLOBAL_DELAY = 1.0;
+let LAG_COMPENSATION = 1.0;
+var LOCAL = 0;
+let MFT = new so.MFT();
+MFT.done.then(() => {
+  MFT.color(12, 0x990000FF);
+  MFT.color(13, 0x000099FF);
+  MFT.color(14, 0x009900FF);
+  MFT.color(15, 0x999900FF);
+});
+
+function draw(x, y, state, id) {
+  if (timestates[id].master) {
+    mix.draw(TEXTURE, x, y + 255, { src: [250, 40, 250, 5], origin: [0,0]});
+  }
+  mix.scissor(x, y, 250, 250);
+  mix.draw(TEXTURE, x, y, {src: [0,0,250, 250], origin: [0,0]});
+  for (var p = 0; p < real_players; ++p) {
+    const tmx = state[p]._timeFields["x"]._getFrames(Timeline.MASTER);
+    const tmy = state[p]._timeFields["y"]._getFrames(Timeline.MASTER);
+    for (let i = 0; i < tmx.length; ++i) {
+      mix.draw(TEXTURE, x + tmx[i].value, y + tmy[i].value,
+        { src: [420, 0, 40, 40],
+          alpha: i/tmx.length,
+          color: state[p].c });
+    }
+
+    const thx = state[p]._timeFields["x"]._getFrames(Timeline.HOST);
+    const thy = state[p]._timeFields["y"]._getFrames(Timeline.HOST);
+    for (let i = 0; i < thx.length; ++i) {
+      mix.draw(TEXTURE, x + thx[i].value, y + thy[i].value,
+        { src: [380, 0, 40, 40],
+          alpha: i/thx.length,
+          color: state[p].c });
+    }
+
+    const tsx = state[p]._timeFields["x"]._getFrames(Timeline.SCRATCH);
+    const tsy = state[p]._timeFields["y"]._getFrames(Timeline.SCRATCH);
+    for (let i = 0; i < tsx.length; ++i) {
+      mix.draw(TEXTURE, x + tsx[i].value, y + tsy[i].value,
+        { src: [340, 0, 40, 40],
+          alpha: i/tsx.length,
+          color: state[p].c });
+    }
+
+    mix.draw(TEXTURE, x + state[p].x, y + state[p].y,
+      { src: [300, 0, 40, 40],
+        color: state[p].c });
+  }
+  mix.scissor();
+}
+
+function action(me, dt, left, right, up) {
+  if (left) { me.vx -= 2000*dt; }
+  if (right) { me.vx += 2000*dt; }
+  if (up) { me.vy -= 100000*dt; }
+}
+
+function move(state, id, dt) {
+  for (let i = 0; i < real_players; ++i) {
+    let pl = state[i];
+
+    pl.x += dt*pl.vx;
+    pl.y += dt*pl.vy;
+
+    if (pl.y >= 230) { pl.y = 230; pl.vy = -pl.vy*0.9; }
+    if (pl.y <= 20)  { pl.y = 20;  pl.vy = -pl.vy*0.9; }
+    if (pl.x <= 20)  { pl.x = 20;  pl.vx = -pl.vx*0.9; }
+    if (pl.x >= 230) { pl.x = 230; pl.vx = -pl.vx*0.9; }
+
+    pl.vx = pl.vx - Math.sign(pl.vx)*Math.clamp(Math.abs(pl.vx*5*dt), 0, Math.abs(pl.vx));
+    pl.vy = pl.vy - Math.sign(pl.vy)*Math.clamp(Math.abs(pl.vy*5*dt), 0, Math.abs(pl.vy)) + 4000*dt;
+  }
+}
+
+function gameTick(ts, state, dt) {
+  // collision
+  for (var p1 = 0; p1 < real_players; ++p1) {
+    for (var p2 = p1+1; p2 < real_players; ++p2) {
+      if (!state[p1].alive || !state[p2].alive) continue;
+
+      var v = new so.Vec2(state[p1].x - state[p2].x,
+                       state[p1].y - state[p2].y);
+      var d = v.length;
+      v.normalize();
+      if (d > 40) continue;
+      var v1 = new so.Vec2(state[p1].vx, state[p1].vy);
+      var v2 = new so.Vec2(state[p2].vx, state[p2].vy);
+      var vv = v1.dot(v) + v2.dot(v);
+      v.length = vv / 2.0;
+      v.length *= 0.9;
+      state[p1].vx += -v.x;
+      state[p1].vy += -v.y;
+      state[p2].vx += v.x;
+      state[p2].vy += v.y;
+      v.normalize();
+      v.length = (40 - d)/2.0;
+      state[p1].x += -v.x;
+      state[p1].y += -v.y;
+      state[p2].x += v.x;
+      state[p2].y += v.y;
+    }
+  }
+};
+
+let states = [];
+let timestates = [];
+let DELAY_COUNTER = 0.0;
+
+mix.run(["texture.png"],
+  files => {
+    TEXTURE = mix.createImage("texture.png");
+    let state0 = [];
+    for (var p = 0; p < players; ++p) {
+      state0.push(new TimeObject(["x", "y", "vx", "vy"], ["c", "alive"]));
+    }
+    state0[0].c = 0x990000FF;
+    state0[1].c = 0x000099FF;
+    state0[2].c = 0x009900FF;
+    // state0[3].c =0x999900FF;
+
+    for (var p = 0; p < players; ++p) {
+      let s = [];
+      let ts = new Timestate();
+      for (var i = 0; i < real_players; ++i) {
+        const to = new TimeObject(
+          ["x", "y", "vx", "vy"],
+          ["c", "alive"],
+          [ state0[i]._timeFields["x"].id,
+            state0[i]._timeFields["y"].id,
+            state0[i]._timeFields["vx"].id,
+            state0[i]._timeFields["vy"].id,
+            state0[i]._timeFields["c"].id,
+            state0[i]._timeFields["alive"].id ]);
+        to._host = i+1;
+        s.push(to);
+
+        if (p == i) {
+          s[i].alive = true;
+          ts.addHost(s[i]);
+        } else {
+          s[i].alive = false;
+          ts.add(s[i]);
+        }
+      }
+      if (p < real_players) {
+        s[p].x = p*250/players + 125/players;
+        s[p].y = 100;
+        s[p].c = state0[p].c;
+        s[p].store();
+      }
+      states.push(s);
+      timestates.push(ts);
+    }
+    timestates[3].master = true;
+  }, dt => {
+    if (dt > 0.1) return;
+    const v = 0.5 + 2.5*MFT.get(0);
+    if (v != LAG_COMPENSATION) {
+      LAG_COMPENSATION = v;
+      console.log("lag comp = ", v);
+    }
+    const v2 = 1.0/(1.0 + 59.0*MFT.get(1));
+    if (v2 != SYNC_TIME) {
+      SYNC_TIME = v2;
+      console.log("sync time = ", 1.0/v2);
+    }
+    const v3 = 5*MFT.get(3);
+    if (v3 != GLOBAL_DELAY) {
+      GLOBAL_DELAY = DELAY_COUNTER = v3;
+      console.log("delay = ", v3);
+    }
+    const v4 = 500*MFT.get(2)/1000;
+    if (v4 != MASTER_DELAY) {
+      MASTER_DELAY = v4;
+      console.log("master delay = ", Math.round(1000*v4) + "ms");
+    }
+
+    const S = Object.assign({}, SERVERB);
+    SERVERB[1] = MFT.get(12)*500;
+    SERVERB[2] = MFT.get(13)*500;
+    SERVERB[3] = MFT.get(14)*500;
+    SERVERB[4] = MFT.get(15)*500;
+    if (S[1] != SERVERB[1] || S[2] != SERVERB[2] ||
+        S[3] != SERVERB[3] || S[4] != SERVERB[4]) {
+      console.log(SERVERB);
+    }
+
+    DELAY_COUNTER -= dt;
+    if (DELAY_COUNTER > 0) {
+      server.addDelay(dt);
+      return;
+    } else {
+      DELAY_COUNTER += GLOBAL_DELAY;
+    }
+
+    mix.clear(0x000000FF);
+    for (var p = 0; p < players; ++p) {
+      LOCAL = p;
+      timestates[p].load(dt);
+      if (p == 0) {
+        action(states[p][p], dt, mix.press("a"), mix.press("d"), mix.just("w"));
+      } else if (p == 1) {
+        action(states[p][p], dt, mix.press("left"), mix.press("right"), mix.just("up"));
+      } else {
+        action(states[p][p], dt, false, false, false);
+      }
+      move(states[p], p, dt);
+      gameTick(timestates[p], states[p], dt);
+      timestates[p].store();
+      timestates[p].sync(dt);
+
+      if (timestates[p].master) {
+        // console.log(states[p][0]._timeFields["y"].dump());
+      }
+    }
+
+    if (mix.press("e")) {
+      console.log(states[3][0]._timeFields["y"].dump(true));
+    }
+
+    for (var p = 0; p < players; ++p) {
+      draw(10 + 260*p, 10, states[p], p);
+    }
+});
+
+</script>
+</body>
+</html>
