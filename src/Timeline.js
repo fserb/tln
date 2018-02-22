@@ -1,5 +1,7 @@
 // Timeline.js
 
+let TIMELINE_ID = 1;
+
 export default class Timeline extends Function {
   constructor(interpolation, id) {
     super();
@@ -41,8 +43,8 @@ export default class Timeline extends Function {
           last = scratch[i];
         }
         if (last !== null) {
-        this.set(last.time - this.now, last.value, Timeline.MASTER);
-        return [[last.time - this.now, last.value, Timeline.MASTER]];
+          this.set(last.time - this.now, last.value, Timeline.MASTER);
+          return [[last.time - this.now, last.value, Timeline.MASTER]];
         }
       }
       return [];
@@ -52,7 +54,8 @@ export default class Timeline extends Function {
       for (let i = 0; i < scratch.length; ++i) {
         if (scratch[i].time > cutoff) break;
         scratch[i].prio = Timeline.MASTER;
-        ret.push([scratch[i].time - this.now, scratch[i].value, Timeline.MASTER]);
+        ret.push(
+          [scratch[i].time - this.now, scratch[i].value, Timeline.MASTER]);
       }
       return ret;
     }
@@ -83,7 +86,7 @@ export default class Timeline extends Function {
   }
 
   dump(full) {
-    let S="[ ";
+    let S = "[ ";
     let i = 1;
     while (i < this.frames.length) {
       if (this.frames[i].time > this.now) break;
@@ -94,18 +97,18 @@ export default class Timeline extends Function {
     for (let x = 0; x < this.frames.length; ++x) {
       const T = {0: "s", 10: "h", 100: "m"}[this.frames[x].prio];
       const V = this.interp == Timeline.FLOAT ? Math.round(this.frames[x].value)
-                                : this.frames[x].value;
+        : this.frames[x].value;
       if (x == i) S += ">";
       if (full) {
         S += "(" + T + " " +
-                   Math.round(100*(this.frames[x].time - this.now))/100 + "," +
-                   V + ") ";
+                   Math.round(100 * (this.frames[x].time - this.now)) / 100 +
+                   "," + V + ") ";
       } else {
         S += Math.round(this.frames[x].value) + T + " ";
       }
     }
 
-    return S+"]";
+    return S + "]";
   }
 
   update(pack) {
@@ -113,22 +116,20 @@ export default class Timeline extends Function {
 
     if (this.interp == Timeline.FLOAT) {
       const last = pack[pack.length - 1];
-      const last_time = last[0] + this.now;
-      const last_value = this.get(last[0]);
-      const delta = last[1] - last_value;
+      const lastTime = last[0] + this.now;
+      const lastValue = this.get(last[0]);
+      const delta = last[1] - lastValue;
       for (let i = 0; i < pack.length; ++i) {
         this.set(pack[i][0], pack[i][1], pack[i][2]);
       }
-      const end_time = this.frames[this.frames.length-1].time;
-      const deltatime = 100 + end_time - last_time;
+      const endTime = this.frames[this.frames.length - 1].time;
+      const deltatime = 100 + endTime - lastTime;
       for (let i = 0; i < this.frames.length; ++i) {
-        if (this.frames[i].time <= last_time) continue;
+        if (this.frames[i].time <= lastTime) continue;
         if (this.frames[i].prio >= last[2]) continue;
-        const distance = (this.frames[i].time - last_time) * deltatime;
+        const distance = (this.frames[i].time - lastTime) * deltatime;
         this.frames[i].value += delta / distance;
       }
-
-
     } else if (this.interp == Timeline.VALUE) {
       for (let i = 0; i < pack.length; ++i) {
         this.set(pack[i][0], pack[i][1], pack[i][2]);
@@ -157,7 +158,7 @@ export default class Timeline extends Function {
     return this.frames.filter(x => x.prio == prio);
   }
 
-  _removeFrames(opts={}) {
+  _removeFrames(opts = {}) {
     if (opts.time !== undefined && opts.prio !== undefined) {
       this.frames = this.frames.filter(x =>
         !((x.prio < opts.prio && x.time <= opts.time) ||
@@ -174,7 +175,7 @@ export default class Timeline extends Function {
   set(time, value, prio = Timeline.SCRATCH) {
     // if (this.id == 2 && value <= 21) debugger;
 
-    if (prio != 0 && prio != 10 && prio != 100) debugger;
+    // if (prio != 0 && prio != 10 && prio != 100) debugger;
     if (value === undefined) {
       value = time;
       time = 0;
@@ -182,11 +183,11 @@ export default class Timeline extends Function {
     time += this.now;
     this._removeFrames({prio: prio, time: time});
 
-    if (this.interp == Timeline.FLOAT && !Number.isFinite(value)) debugger;
+    // if (this.interp == Timeline.FLOAT && !Number.isFinite(value)) debugger;
 
     let i = 0;
     while (i < this.frames.length) {
-      if (this.frames[i].time == time ) debugger;
+      // if (this.frames[i].time == time ) debugger;
       if (this.frames[i].time > time) break;
       i++;
     }
@@ -216,9 +217,9 @@ export default class Timeline extends Function {
       // forward interpolation:
       if (i == tf.length - 1) return tf[i].value;
       // backward interpolation:
-      if (tf[i].time == tf[i+1].time) debugger;
-      const fraction = (time - tf[i].time)/(tf[i+1].time - tf[i].time);
-      return tf[i].value + fraction*(tf[i+1].value - tf[i].value);
+      // if (tf[i].time == tf[i + 1].time) debugger;
+      const fraction = (time - tf[i].time) / (tf[i + 1].time - tf[i].time);
+      return tf[i].value + fraction * (tf[i + 1].value - tf[i].value);
     } else if (this.interp == Timeline.VALUE) {
       return tf[i].value;
     }

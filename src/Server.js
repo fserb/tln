@@ -1,13 +1,12 @@
 // Server?
 
 const SERVERB = [0, 35, 250, 50, 150];
-let SYNC_TIME = 1.0/10.0;
-let PRE_FORK_WINDOW = 5;
-let MASTER_DELAY = 0.2;
+const GLOBAL_DELAY = 1.0;
 
-var server = (function() {
-  var delay = (b) => GLOBAL_DELAY*1000 + Math.max(0, b*(1.0 + 0.2*Math.random()));
-  var pubsub = {};
+const server = (function() {
+  const delay = b => GLOBAL_DELAY * 1000 +
+    Math.max(0, b * (1.0 + 0.2 * Math.random()));
+  const pubsub = {};
   let ddd = 0;
   return {
     addDelay: function(d) {
@@ -21,17 +20,17 @@ var server = (function() {
       if (!pubsub[name]) pubsub[name] = [];
       pubsub[name].push(
         (value, d2) => {
-          setTimeout(cb.bind(this, value), delay((d2 + d1)/2.0));
+          setTimeout(cb.bind(this, value), delay((d2 + d1) / 2.0));
         }
       );
     },
     publish: function(name, id, value) {
       if (!pubsub[name]) return;
-      for (var f of pubsub[name]) {
+      for (const f of pubsub[name]) {
         f(JSON.parse(JSON.stringify(value)), SERVERB[id]);
       }
     },
   };
 })();
 
-export default server;
+export {server, SERVERB};

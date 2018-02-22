@@ -1,5 +1,13 @@
 // Timestate
 
+import {server, SERVERB} from "./Server.js";
+import Timeline from "./Timeline.js";
+
+let TIMESTATE_ID = 1;
+const MASTER_DELAY = 0.2;
+const LAG_COMPENSATION = 1.0;
+const SYNC_TIME = 1.0 / 10.0;
+
 export default class Timestate {
   constructor() {
     this.id = TIMESTATE_ID++;
@@ -14,7 +22,7 @@ export default class Timestate {
     server.subscribe("sync", this.id, this.update.bind(this));
   }
 
-  getDelay(obj, dt) {
+  getDelay(obj) {
     if (this.master) return -MASTER_DELAY;
     if (obj._host == this.id) return 0;
 
@@ -22,20 +30,20 @@ export default class Timestate {
   }
 
   load(dt) {
-    for (let o of this.objects) {
+    for (const o of this.objects) {
       o.load(this.getDelay(o) - dt);
     }
   }
 
-  store(prio=Timeline.SCRATCH) {
-    for (let o of this.objects) {
+  store(prio = Timeline.SCRATCH) {
+    for (const o of this.objects) {
       o.store(this.getDelay(o), prio);
     }
   }
 
   add(obj) {
     this.objects.push(obj);
-    for (let f in obj._timeFields) {
+    for (const f in obj._timeFields) {
       const t = obj._timeFields[f];
       this.state[t.id] = t;
     }
@@ -44,7 +52,7 @@ export default class Timestate {
   addHost(obj) {
     obj._host = this.id;
     this.objects.push(obj);
-    for (let f in obj._timeFields) {
+    for (const f in obj._timeFields) {
       const t = obj._timeFields[f];
       this.state[t.id] = t;
       this.hostState[t.id] = t;
@@ -53,7 +61,7 @@ export default class Timestate {
 
   sync(dt) {
     this.now = server.time();
-    for (var k in this.state) {
+    for (const k in this.state) {
       this.state[k].now = this.now;
     }
 
@@ -64,12 +72,12 @@ export default class Timestate {
     const pack = {id: this.id, time: server.time() };
 
     if (this.master) {
-      for (var k in this.state) {
+      for (const k in this.state) {
         const v = this.state[k].masterSync(MASTER_DELAY);
         if (v.length) pack[k] = v;
       }
     } else {
-      for (var k in this.hostState) {
+      for (const k in this.hostState) {
         pack[k] = this.state[k].hostSync();
       }
     }
@@ -81,9 +89,9 @@ export default class Timestate {
     if (val.id == this.id) return;
     this.lastSync[val.id] = val.time;
     const delta = this.now - val.time;
-    for (var k in val) {
+    for (const k in val) {
       if (!this.state[k]) continue;
-      for (let o of val[k]) {
+      for (const o of val[k]) {
         o[0] -= delta;
       }
       // if (this.hostState[k]) debugger;
