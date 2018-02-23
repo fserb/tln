@@ -10,14 +10,13 @@ export default class CommLocal extends Comm {
   constructor(lag) {
     super();
     this.lag = lag;
-  }
-
-  _subscribe(callback) {
     pubsub.push(
       (value, d2) => {
-        setTimeout(callback.bind(this, value), delay((d2 + this.lag) / 2.0));
+        setTimeout(this._receive.bind(this, value),
+          delay((d2 + this.lag) / 2.0));
       }
     );
+    this.done = new Promise((res, _rej) => res());
   }
 
   _publish(packet) {

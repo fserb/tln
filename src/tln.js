@@ -1,14 +1,19 @@
 // TLN
 
+// import C from "./Consts.js";
+
 import Timeline from "./Timeline.js";
 import Timestate from "./Timestate.js";
 import TimeObject from "./Timeobject.js";
+
+import ServiceID from "./ServiceID.js";
 
 import CommLocal from "./comm/CommLocal.js";
 
 const DEFAULT_PARAMS = {
   commSystem: "local",
   commLocalLag: 0,
+  servicesHelloWaitTime: 1.0,
 };
 
 class TLN {
@@ -16,11 +21,14 @@ class TLN {
 
   init(params = {}) {
     this.params = Object.assign({}, DEFAULT_PARAMS, params);
-    this._comm = null;
+    this.comm = null;
     switch(this.params.commSystem) {
-    case "local": this._comm = new CommLocal(this.params.commLocalLag);
+    case "local": this.comm = new CommLocal(this.params.commLocalLag);
     }
-    this._state = new Timestate(this._comm);
+    return this.comm.done.then(() => {
+      this._serviceID = new ServiceID(this);
+      this._state = new Timestate(this.comm);
+    });
   }
 }
 TLN.prototype.TLN = TLN;

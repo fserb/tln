@@ -8,17 +8,28 @@ QUnit.config.noglobals = true;
 QUnit.config.testTimeout = 5000;
 QUnit.config.seed = String(Math.random());
 
+window.tln1 = window.tln2 = null;
+
 window.hooks = {
-  beforeEach: function() {
+  beforeEach: function(assert) {
     tln.TLN.DEFAULT_PARAMS.commSystem = "local";
     tln.TLN.DEFAULT_PARAMS.commLocalLag = 1;
     window.tln = window.tln1 = new tln.TLN();
     window.tln2 = new tln.TLN();
+    const par = {
+      commSystem: "local",
+      commLocalLag: 0,
+      servicesHelloWaitTime: 0.1,
+    };
+    Promise.all([
+      window.tln1.init(par),
+      window.tln2.init(par)]).then(assert.async());
   },
   afterEach: function() {
-    window.tln1._comm._resetForTesting();
-    delete window.tln1;
-    delete window.tln2;
+    if (window.location.href.indexOf("testId") == -1) {
+      window.tln1.comm._resetForTesting();
+      window.tln1 = window.tln2 = null;
+    }
   }
 };
 

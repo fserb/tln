@@ -3,19 +3,11 @@
 
 QUnit.module("tln", window.hooks, function() {
   QUnit.test("init", function(assert) {
-    tln1.init();
     assert.ok(tln1._state);
-    assert.ok(tln1._comm);
-  });
-
-  QUnit.test("duo init", function(assert) {
-    tln1.init();
-    tln2.init();
-    assert.ok(tln1._state);
-    assert.ok(tln1._comm);
+    assert.ok(tln1.comm);
     assert.ok(tln2._state);
-    assert.ok(tln2._comm);
+    assert.ok(tln2.comm);
     assert.notEqual(tln1._state, tln2._state);
-    assert.notEqual(tln1._comm, tln2._comm);
+    assert.notEqual(tln1.comm, tln2.comm);
   });
 });
