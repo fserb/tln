@@ -24,6 +24,7 @@ class TLN {
   }
 }
 TLN.prototype.TLN = TLN;
+TLN.DEFAULT_PARAMS = DEFAULT_PARAMS;
 TLN.prototype.Timeline = Timeline;
 TLN.prototype.Timestate = Timestate;
 TLN.prototype.TimeObject = TimeObject;

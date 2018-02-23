@@ -1,6 +1,7 @@
 // tests.js
 
 /* global QUnit $ sinon tln */
+/* eslint no-underscore-dangle: "off" */
 
 QUnit.config.noglobals = true;
 // QUnit.config.hidepassed = true;
@@ -9,11 +10,13 @@ QUnit.config.seed = String(Math.random());
 
 window.hooks = {
   beforeEach: function() {
-    window.tln =
-      window.tln1 = new tln.TLN({commSystem: "local", commLocalLag: 0});
-    window.tln2 = new tln.TLN({commSystem: "local", commLocalLag: 0});
+    tln.TLN.DEFAULT_PARAMS.commSystem = "local";
+    tln.TLN.DEFAULT_PARAMS.commLocalLag = 1;
+    window.tln = window.tln1 = new tln.TLN();
+    window.tln2 = new tln.TLN();
   },
   afterEach: function() {
+    window.tln1._comm._resetForTesting();
     delete window.tln1;
     delete window.tln2;
   }

@@ -1,7 +1,7 @@
 /* global QUnit tln1 tln2 */
 /* eslint no-underscore-dangle: "off" */
 
-QUnit.module("tln.comm", window.hooks, function() {
+QUnit.module("tln", window.hooks, function() {
   QUnit.test("init", function(assert) {
     tln1.init();
     assert.ok(tln1._state);

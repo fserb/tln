@@ -25,4 +25,8 @@ export default class CommLocal extends Comm {
       f(JSON.parse(JSON.stringify(packet)), this.lag);
     }
   }
+
+  _resetForTesting() {
+    pubsub.length = 0;
+  }
 }
