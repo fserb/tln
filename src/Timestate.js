@@ -1,15 +1,15 @@
 // Timestate
 
-import {server, SERVERB} from "./Server.js";
 import Timeline from "./Timeline.js";
 
 let TIMESTATE_ID = 1;
 const MASTER_DELAY = 0.2;
 const LAG_COMPENSATION = 1.0;
 const SYNC_TIME = 1.0 / 10.0;
+const SERVERB = [0, 35, 250, 50, 150];
 
 export default class Timestate {
-  constructor() {
+  constructor(comm) {
     this.id = TIMESTATE_ID++;
     this.state = {};
     this.hostState = {};
@@ -18,8 +18,9 @@ export default class Timestate {
     this.syncTime = 0;
     this.now = 0;
     this.master = false;
+    this._comm = comm;
 
-    server.subscribe("sync", this.id, this.update.bind(this));
+    this._comm.subscribe(this.update.bind(this));
   }
 
   getDelay(obj) {
@@ -60,7 +61,7 @@ export default class Timestate {
   }
 
   sync(dt) {
-    this.now = server.time();
+    this.now = this._comm.time();
     for (const k in this.state) {
       this.state[k].now = this.now;
     }
@@ -69,7 +70,7 @@ export default class Timestate {
     if (this.syncTime > 0) return;
     this.syncTime += SYNC_TIME;
 
-    const pack = {id: this.id, time: server.time() };
+    const pack = {id: this.id, time: this._comm.time() };
 
     if (this.master) {
       for (const k in this.state) {
@@ -82,7 +83,7 @@ export default class Timestate {
       }
     }
 
-    server.publish("sync", this.id, pack);
+    this._comm.publish("sync", this.id, pack);
   }
 
   update(val) {

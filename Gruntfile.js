@@ -22,7 +22,7 @@ module.exports = function(grunt) {
     },
 
     eslint: {
-      tln: ['src/**/*.js', 'tests/**/*.js']
+      tln: ['src/**/*.js', 'test/**/*.js']
     },
 
     rollup: {

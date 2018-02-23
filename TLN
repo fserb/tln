@@ -2,6 +2,12 @@ TLN
 ===
 
 TODO:
+
+- high level comm that deals with clock and ping sync
+- low level comm provides pub/sub for: deepstream, webrtc, test
+- abstract consts
+- tests
+
 - new entity creation: authoritative, especulative (needs to find a matching
   authoritative within X time).
   - registry for new entities
@@ -11,6 +17,7 @@ TODO:
 
 - clock and ping sync
 
+- add PSON support for Comm interface
 
 IDEAS:
 - fixed time stamp for simulation (20hz?)
