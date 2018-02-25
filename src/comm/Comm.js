@@ -7,16 +7,27 @@ export default class Comm {
     this._subs = [];
     this.id = 0;
     this.done = new Promise((res, _rej) => res());
+    this._timeDrift = 0.0;
+    this._ping = {};
   }
 
   // returns current time in seconds (high precision), adjusted to
   // sync with current network.
   time() {
-    return window.performance.now() / 1000;
+    return this._timeDrift + (window.performance.now() / 1000);
+  }
+
+  addTimeDrift(d) {
+    this._timeDrift += d;
   }
 
   // returns adjusted ping from here to @other.
-  ping(_other) {
+  ping(other) {
+    return this._ping[other] || 0;
+  }
+
+  addPing(other, value) {
+    this._ping[other] = value;
   }
 
   subscribe(messages, callback) {
@@ -35,6 +46,7 @@ export default class Comm {
   }
 
   publish(payload) {
+    if (this.id) payload.id = this.id;
     console.log(this.id + ":", payload);
     this._publish(payload);
   }

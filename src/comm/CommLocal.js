@@ -12,10 +12,9 @@ export default class CommLocal extends Comm {
     this.lag = lag;
     pubsub.push(
       (value, d2) => {
-        setTimeout(this._receive.bind(this, value),
-          delay((d2 + this.lag) / 2.0));
-      }
-    );
+        const l = (d2 + this.lag) / 2.0;
+        setTimeout(this._receive.bind(this, value), delay(l));
+      });
     this.done = new Promise((res, _rej) => res());
   }
 

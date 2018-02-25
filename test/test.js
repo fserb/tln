@@ -93,6 +93,18 @@ sinon.assert.pass = function(assertion) {
   QUnit.assert.ok(true, assertion);
 };
 
+function delay(t, ...args) {
+  return new Promise(function(resolve) {
+    setTimeout(resolve.bind(null, ...args), t);
+  });
+}
+
+Promise.prototype.delay = function(t) {
+  return this.then(function(...args) {
+    return delay(t, ...args);
+  });
+};
+
 sinon.config = {
   injectIntoThis: true,
   injectInto: null,

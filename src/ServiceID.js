@@ -20,7 +20,7 @@ export default class ServiceID {
       { "req": this._preID, "guid": this._preGUID } });
     clearTimeout(this._waintingHello);
     this._waintingHello = setTimeout(this._forceID.bind(this),
-      this._tln.params.serviceHelloWaitTime * 1000);
+      (this._tln.params.serviceHelloWaitTime + 100 * Math.random()) * 1000);
   }
 
   _forceID() {

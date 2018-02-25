@@ -7,6 +7,7 @@ import Timestate from "./Timestate.js";
 import TimeObject from "./Timeobject.js";
 
 import ServiceID from "./ServiceID.js";
+import ServiceTime from "./ServiceTime.js";
 
 import CommLocal from "./comm/CommLocal.js";
 
@@ -27,6 +28,7 @@ class TLN {
     }
     return this.comm.done.then(() => {
       this._serviceID = new ServiceID(this);
+      this._serviceTime = new ServiceTime(this);
       this._state = new Timestate(this.comm);
     });
   }
