@@ -20,7 +20,7 @@ export default class ServiceTime {
 
     for (const p in this.peers) {
       const pl = this.peers[p];
-      if (pl.length < 20) continue;
+      if (pl.length < 5) continue;
       pl.splice(0, pl.length - 20);
       const c = pl.slice();
       c.sort((a, b) => a.ping - b.ping);
