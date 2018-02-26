@@ -53,17 +53,16 @@ export default class ServiceTime {
 
   appendTime(msg) {
     const real = this.realTime();
-    const st = new proto.ServiceTime();
-    msg.setServiceTime(st);
-    st.setNow(this._tln.comm.time());
-    st.setReal(real);
+    msg.serviceTime = new proto.ServiceTime();
+    msg.serviceTime.now = this._tln.comm.time();
+    msg.serviceTime.real = real;
 
     for (const p of this.pending) {
       const r = new proto.ServiceTime.Response();
-      r.setFrom(p.from);
-      r.setOrigin(p.orig);
-      r.setDelay(real - p.received);
-      st.addResponse(r);
+      r.from = p.from;
+      r.origin = p.orig;
+      r.delay = real - p.received;
+      msg.serviceTime.response.push(r);
     }
     this.pending.length = 0;
 
@@ -71,22 +70,22 @@ export default class ServiceTime {
   }
 
   receiveTime(msg) {
-    if (!msg.hasServiceTime()) return;
-    const st = msg.getServiceTime();
+    if (!msg.serviceTime) return;
+    const st = msg.serviceTime;
     const now = this._tln.comm.time();
     const real = this.realTime();
-    const pid = msg.getId();
-    this.pending.push({from: pid, orig: st.getReal(), received: real});
+    const pid = msg.id;
+    this.pending.push({from: pid, orig: st.real, received: real});
 
-    const rl = st.getResponseList();
+    const rl = st.response;
     for (let i = 0; i < rl.length; ++i) {
-      if (rl[i].getFrom() != this._tln.comm.id) continue;
+      if (rl[i].from != this._tln.comm.id) continue;
       const res = rl[i];
 
       if (!(pid in this.peers)) this.peers[pid] = [];
 
-      const ping = real - res.getOrigin() - res.getDelay();
-      const remote = st.getNow() + (ping / 2.0);
+      const ping = real - res.origin - res.delay;
+      const remote = st.now + (ping / 2.0);
 
       this.peers[pid].push({ ping: ping, delta: remote - now });
       this.adjustTime();

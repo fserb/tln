@@ -6,13 +6,13 @@ QUnit.module("tln.comm", window.hooks, function() {
     const done = assert.async(1);
 
     tln2.comm.subscribe(msg => {
-      if (msg.getFieldForTesting() == 123) {
+      if (msg.fieldForTesting == 123) {
         done();
       }
     });
 
     const r = new proto.Message();
-    r.setFieldForTesting(123);
+    r.fieldForTesting = 123;
     tln1.comm.publish(r);
   });
 
@@ -20,19 +20,19 @@ QUnit.module("tln.comm", window.hooks, function() {
     const done = assert.async(2);
 
     tln1.comm.subscribe(data => {
-      assert.notEqual(data.getFieldForTesting(), 1);
-      if (data.getFieldForTesting() == 2) done();
+      assert.notEqual(data.fieldForTesting, 1);
+      if (data.fieldForTesting == 2) done();
     });
 
     tln2.comm.subscribe(data => {
-      assert.notEqual(data.getFieldForTesting(), 2);
-      if (data.getFieldForTesting() == 1) done();
+      assert.notEqual(data.fieldForTesting, 2);
+      if (data.fieldForTesting == 1) done();
     });
 
     const r = new proto.Message();
-    r.setFieldForTesting(1);
+    r.fieldForTesting = 1;
     tln1.comm.publish(r);
-    r.setFieldForTesting(2);
+    r.fieldForTesting = 2;
     tln2.comm.publish(r);
   });
 });

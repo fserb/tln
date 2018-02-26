@@ -3,21 +3,19 @@ TLN
 
 TODO:
 
+- Timeline (FLOAT/VALUE)
+-
+
+
 - new entity creation: authoritative, especulative (needs to find a matching
   authoritative within X time).
   - registry for new entities
   -
   -
-- full entity creation sync (for new playes)
-
-- add PSON support for Comm interface
+- full entity creation sync (for new players)
 
 - commDeepstream
 - commWebRTC (over XMPP?)
-
-IDEAS:
-- fixed time stamp for simulation (20hz?)
-
 
 WEBRTC:
 - https://github.com/feross/simple-peer

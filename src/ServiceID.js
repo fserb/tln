@@ -35,11 +35,10 @@ export default class ServiceID {
       (1 + Math.floor(Math.random() * (1 << C.ID_BITS)));
 
     const m = new proto.Message();
-    const mi = new proto.ServiceId();
-    m.setServiceId(mi);
-    mi.setStatus(proto.ServiceId.Status.REQUEST);
-    mi.setGuid(this._GUID);
-    mi.setRequest(this._preID);
+    m.serviceId = new proto.ServiceId();
+    m.serviceId.status = proto.ServiceId.Status.REQUEST;
+    m.serviceId.guid = this._GUID;
+    m.serviceId.request = this._preID;
     this._tln.comm.publish(m);
     this._schedule(() => this._forceID());
   }
@@ -52,20 +51,20 @@ export default class ServiceID {
   }
 
   receiveHello(msg) {
-    if (!msg.hasServiceId()) return;
-    const mid = msg.getServiceId();
+    if (!msg.serviceId) return;
+    const mid = msg.serviceId;
     // we need to block our own messages before we have IDs.
-    if (mid.getGuid() == this._GUID) return;
-    this._knownIDs.add(msg.getId());
+    if (mid.guid == this._GUID) return;
+    this._knownIDs.add(msg.id);
 
     const res = new proto.Message();
     const rid = new proto.ServiceId();
-    res.setServiceId(rid);
-    rid.setRequest(mid.getRequest());
+    res.serviceId = rid;
+    rid.request = mid.request;
 
     if (this._tln.comm.id != 0) {
-      if (mid.getStatus() == proto.ServiceId.Status.REQUEST) {
-        const req = mid.getRequest();
+      if (mid.status == proto.ServiceId.Status.REQUEST) {
+        const req = mid.request;
         if (this._knownIDs.has(req)) {
           let sug = -1;
           for (let i = 0; i < (1 << C.ID_BITS); ++i) {
@@ -74,27 +73,27 @@ export default class ServiceID {
             sug = s;
             break;
           }
-          rid.setStatus(proto.ServiceId.Status.DENIED);
-          rid.setSuggestion(sug);
+          rid.status = proto.ServiceId.Status.DENIED;
+          rid.suggestion = sug;
         } else {
           this._knownIDs.add(req);
-          rid.setStatus(proto.ServiceId.Status.ACCEPT);
+          rid.status = proto.ServiceId.Status.ACCEPT;
         }
-        rid.setRequest(req);
+        rid.request = req;
         this._tln.comm.publish(res);
       }
-    } else if (mid.getRequest() == this._preID) {
-      rid.setGuid(this._GUID);
-      if (mid.getStatus() == proto.ServiceId.Status.DENIED) {
-        this._askForID(mid.getSuggestion());
-      } else if (mid.getStatus() == proto.ServiceId.Status.ACCEPT) {
+    } else if (mid.request == this._preID) {
+      rid.guid = this._GUID;
+      if (mid.status == proto.ServiceId.Status.DENIED) {
+        this._askForID(mid.suggestion);
+      } else if (mid.status == proto.ServiceId.Status.ACCEPT) {
         this._forceID();
       } else {
         this._askForID();
-        rid.setStatus(proto.ServiceId.Status.DENIED);
+        rid.status = proto.ServiceId.Status.DENIED;
         this._tln.comm.publish(res);
       }
-    } else if (mid.getStatus() == proto.ServiceId.Status.REQUEST) {
+    } else if (mid.status == proto.ServiceId.Status.REQUEST) {
       this._schedule(() => this._askForID());
     }
   }

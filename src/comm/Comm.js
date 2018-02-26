@@ -37,17 +37,16 @@ export default class Comm {
   }
 
   _receive(payload) {
-    const msg = proto.Message.deserializeBinary(payload);
-    if (this.id != 0 && msg.getId() == this.id) return;
+    const msg = proto.Message.decode(payload);
+    if (this.id != 0 && msg.id == this.id) return;
     for (const cb of this._subs) {
       cb(msg);
     }
   }
 
   publish(payload) {
-    if (!(payload instanceof proto.Message)) throw "only publish proto.Message";
-    if (this.id) payload.setId(this.id);
-    console.log(this.id + ":", payload.toObject());
-    this._publish(payload.serializeBinary());
+    if (this.id) payload.id = this.id;
+    console.log(this.id + ":", proto.Message.toObject(payload));
+    this._publish(proto.Message.encode(payload).finish());
   }
 }

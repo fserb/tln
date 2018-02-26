@@ -31,14 +31,19 @@ module.exports = function(grunt) {
 
     eslint: {
       options: {
-        ignorePattern: 'src/proto/*',
+        ignorePattern: ['Message_pb.js'],
       },
       tln: ['src/.', 'test/.']
     },
 
     exec: {
       proto: {
-        cmd: 'protoc src/Message.proto --js_out=import_style=commonjs,binary:.',
+        cmd: ('yarn run pbjs -t static-module -w es6 ' +
+          '-o src/Message_pb.js src/Message.proto'),
+      },
+      protoWeb: {
+        cmd: ('yarn run pbjs -t static-module -w closure ' +
+          '-o test/Message_pb.js src/Message.proto'),
       },
     },
 
@@ -46,17 +51,19 @@ module.exports = function(grunt) {
       options: {
         moduleName: 'tln',
         format: 'umd',
+
         plugins: [
           require('rollup-plugin-node-resolve')({
+            jsnext: true, browser: true
           }),
           require('rollup-plugin-commonjs')({
+            namedExports: {
+              'node_modules/protobufjs/minimal.js':
+                ['Reader', 'Writer', 'util', 'roots'],
+            },
             ignore: [],
           }),
-          require('rollup-plugin-node-builtins')(),
-          require('rollup-plugin-node-globals')(),
-          require('rollup-plugin-replace')({
-            // google-protobuf uses eval() for some reason.
-            eval: undefined, }),
+          require('rollup-plugin-replace')({ eval: '[eval][0]' }),
         ]
       },
 
@@ -93,7 +100,7 @@ module.exports = function(grunt) {
     }
   });
 
-  grunt.registerTask('proto', ['exec:proto']);
+  grunt.registerTask('proto', ['exec:proto', 'exec:protoWeb']);
   grunt.registerTask('package', ['uglify']);
   grunt.registerTask('buildjs', ['rollup:tln']);
   grunt.registerTask('build', ['proto', 'buildjs']);

@@ -6,7 +6,6 @@
   "author": "Fernando Serboncini <fserb@fserb.com.br>",
   "license": "MIT",
   "devDependencies": {
-    "google-protobuf": "^3.5.0",
     "grunt": "^1.0.1",
     "grunt-contrib-uglify-es": "git+https://github.com/gruntjs/grunt-contrib-uglify.git#harmony",
     "grunt-contrib-watch": "^1.0.0",
@@ -14,8 +13,10 @@
     "grunt-exec": "^3.0.0",
     "grunt-rollup": "https://github.com/fyrkant/grunt-rollup.git#update-config-options",
     "jquery": "^3.3.1",
+    "protobufjs": "^6.8.6",
     "qunit": "^2.5.0",
     "rollup": "^0.55.1",
+    "rollup-plugin-buble": "^0.19.2",
     "rollup-plugin-commonjs": "^8.3.0",
     "rollup-plugin-node-builtins": "^2.1.2",
     "rollup-plugin-node-globals": "^1.1.0",

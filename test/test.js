@@ -10,6 +10,8 @@ QUnit.config.seed = String(Math.random());
 
 window.tln1 = window.tln2 = null;
 
+window.proto = window.protobuf.roots["default"];
+
 window.hooks = {
   beforeEach: function(assert) {
     tln.TLN.DEFAULT_PARAMS.commSystem = "local";
