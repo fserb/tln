@@ -35,4 +35,18 @@ QUnit.module("tln.comm", window.hooks, function() {
     r.fieldForTesting = 2;
     tln2.comm.publish(r);
   });
+
+  QUnit.test("genNewID", function(assert) {
+    assert.notEqual(tln1.comm.id, 0);
+    assert.notEqual(tln2.comm.id, 0);
+    const seen = new Set();
+    for (let i = 0; i < 100; ++i) {
+      const g1 = tln1.comm.genNewID();
+      const g2 = tln2.comm.genNewID();
+      assert.notOk(seen.has(g1));
+      seen.add(g1);
+      assert.notOk(seen.has(g2));
+      seen.add(g2);
+    }
+  });
 });
