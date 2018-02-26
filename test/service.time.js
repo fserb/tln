@@ -1,4 +1,4 @@
-/* global QUnit tln1 tln2 */
+/* global QUnit tln1 tln2 proto */
 /* eslint no-underscore-dangle: "off" */
 
 QUnit.module("tln.service.time", window.hooks, function() {
@@ -9,8 +9,8 @@ QUnit.module("tln.service.time", window.hooks, function() {
 
     for (let i = 0; i < 20; ++i) {
       p = p.delay(0).then(() => {
-        tln1.comm.publish(tln1._serviceTime.appendTime({}));
-        tln2.comm.publish(tln2._serviceTime.appendTime({}));
+        tln1.comm.publish(tln1._serviceTime.appendTime(new proto.Message()));
+        tln2.comm.publish(tln2._serviceTime.appendTime(new proto.Message()));
         if (i == 19) {
           const d1 = tln1.comm._timeDrift;
           const d2 = tln2.comm._timeDrift;
@@ -37,11 +37,11 @@ QUnit.module("tln.service.time", window.hooks, function() {
 
     let p = Promise.resolve("");
 
-    for (let i = 0; i < 20; ++i) {
+    for (let i = 0; i < 30; ++i) {
       p = p.delay(0).then(() => {
-        tln1.comm.publish(tln1._serviceTime.appendTime({}));
-        tln2.comm.publish(tln2._serviceTime.appendTime({}));
-        if (i == 19) {
+        tln1.comm.publish(tln1._serviceTime.appendTime(new proto.Message()));
+        tln2.comm.publish(tln2._serviceTime.appendTime(new proto.Message()));
+        if (i == 29) {
           const delta = tln1.comm.time() - tln2.comm.time();
           assert.ok(Math.abs(delta) < 0.001);
           const p12 = tln1.comm.ping(tln2.comm.id);
@@ -66,8 +66,8 @@ QUnit.module("tln.service.time", window.hooks, function() {
 
     for (let i = 0; i < 20; ++i) {
       p = p.delay(30).then(() => {
-        tln1.comm.publish(tln1._serviceTime.appendTime({}));
-        tln2.comm.publish(tln2._serviceTime.appendTime({}));
+        tln1.comm.publish(tln1._serviceTime.appendTime(new proto.Message()));
+        tln2.comm.publish(tln2._serviceTime.appendTime(new proto.Message()));
         if (i == 19) {
           const d1 = tln1.comm._timeDrift;
           const d2 = tln2.comm._timeDrift;
@@ -99,8 +99,8 @@ QUnit.module("tln.service.time", window.hooks, function() {
 
     for (let i = 0; i < 20; ++i) {
       p = p.delay(30).then(() => {
-        tln1.comm.publish(tln1._serviceTime.appendTime({}));
-        tln2.comm.publish(tln2._serviceTime.appendTime({}));
+        tln1.comm.publish(tln1._serviceTime.appendTime(new proto.Message()));
+        tln2.comm.publish(tln2._serviceTime.appendTime(new proto.Message()));
         if (i == 19) {
           const delta = tln1.comm.time() - tln2.comm.time();
           assert.ok(Math.abs(delta) < 0.005);

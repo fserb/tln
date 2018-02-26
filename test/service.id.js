@@ -21,9 +21,8 @@ QUnit.module("tln.service.id", window.hooks, function() {
 
   QUnit.test("fail id", function(assert) {
     const done = assert.async(1);
-    tln1._serviceID._askForID(1);
-    tln2._serviceID._askForID(1);
-
+    tln1._serviceID._askForID(3);
+    tln2._serviceID._askForID(3);
     const objs = [tln1, tln2];
 
     const checkID = function() {

@@ -1,4 +1,4 @@
-/* global module */
+/* global module require */
 
 module.exports = function(grunt) {
   "use strict";
@@ -7,6 +7,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-contrib-uglify-es');
+  grunt.loadNpmTasks('grunt-exec');
 
   grunt.initConfig({
     pkg: grunt.file.readJSON("package.json"),
@@ -14,7 +15,14 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['src/**/*.js'],
-        tasks: ['build'],
+        tasks: ['buildjs'],
+        options: {
+          interrupt: true,
+        }
+      },
+      proto: {
+        files: ['src/**/*.proto'],
+        tasks: ['proto'],
         options: {
           interrupt: true,
         }
@@ -22,13 +30,34 @@ module.exports = function(grunt) {
     },
 
     eslint: {
-      tln: ['src/**/*.js', 'test/**/*.js']
+      options: {
+        ignorePattern: 'src/proto/*',
+      },
+      tln: ['src/.', 'test/.']
+    },
+
+    exec: {
+      proto: {
+        cmd: 'protoc src/Message.proto --js_out=import_style=commonjs,binary:.',
+      },
     },
 
     rollup: {
       options: {
         moduleName: 'tln',
         format: 'umd',
+        plugins: [
+          require('rollup-plugin-node-resolve')({
+          }),
+          require('rollup-plugin-commonjs')({
+            ignore: [],
+          }),
+          require('rollup-plugin-node-builtins')(),
+          require('rollup-plugin-node-globals')(),
+          require('rollup-plugin-replace')({
+            // google-protobuf uses eval() for some reason.
+            eval: undefined, }),
+        ]
       },
 
       tln: {
@@ -64,8 +93,10 @@ module.exports = function(grunt) {
     }
   });
 
+  grunt.registerTask('proto', ['exec:proto']);
   grunt.registerTask('package', ['uglify']);
-  grunt.registerTask('build', ['rollup:tln']);
+  grunt.registerTask('buildjs', ['rollup:tln']);
+  grunt.registerTask('build', ['proto', 'buildjs']);
   grunt.registerTask('lint', ['eslint']);
 
   grunt.registerTask('release', ['lint', 'build', 'package']);

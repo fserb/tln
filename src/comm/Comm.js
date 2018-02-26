@@ -2,6 +2,8 @@
 
 // Subclasses must provide a pubsub interface of a single channel.
 
+import proto from "../Message_pb.js";
+
 export default class Comm {
   constructor() {
     this._subs = [];
@@ -26,28 +28,26 @@ export default class Comm {
     return this._ping[other] || 0;
   }
 
-  addPing(other, value) {
+  setPing(other, value) {
     this._ping[other] = value;
   }
 
-  subscribe(messages, callback) {
-    this._subs.push({callback: callback, messages: messages});
+  subscribe(callback) {
+    this._subs.push(callback);
   }
 
   _receive(payload) {
-    if (payload.id == this.id) return;
-    for (const s of this._subs) {
-      if (s.messages == "*") {
-        s.callback(payload.id || 0, payload);
-      } else if (s.messages in payload) {
-        s.callback(payload.id || 0, payload[s.messages]);
-      }
+    const msg = proto.Message.deserializeBinary(payload);
+    if (this.id != 0 && msg.getId() == this.id) return;
+    for (const cb of this._subs) {
+      cb(msg);
     }
   }
 
   publish(payload) {
-    if (this.id) payload.id = this.id;
-    console.log(this.id + ":", payload);
-    this._publish(payload);
+    if (!(payload instanceof proto.Message)) throw "only publish proto.Message";
+    if (this.id) payload.setId(this.id);
+    console.log(this.id + ":", payload.toObject());
+    this._publish(payload.serializeBinary());
   }
 }

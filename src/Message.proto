@@ -1,0 +1,40 @@
+// Protocol buffer.
+
+syntax = "proto3";
+
+message Message {
+  int32 id = 1;
+
+  ServiceId service_id = 2;
+  ServiceTime service_time = 3;
+
+
+  int32 field_for_testing = 99;
+}
+
+message ServiceTime {
+  double now = 1;
+  double real = 2;
+
+  message Response {
+    int32 from = 1;
+    double origin = 2;
+    double delay = 3;
+  }
+  repeated Response response = 3;
+}
+
+message ServiceId {
+  string guid = 1;
+  int32 request = 2;
+
+  enum Status {
+    INVALID = 0;
+    REQUEST = 1;
+    ACCEPT = 2;
+    DENIED = 3;
+  }
+  Status status = 3;
+
+  int32 suggestion = 4;
+}

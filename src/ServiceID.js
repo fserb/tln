@@ -1,26 +1,47 @@
 
 import C from "./Consts.js";
+import proto from "./Message_pb.js";
 
 export default class ServiceID {
   constructor(tln) {
     this._tln = tln;
-    this._tln.comm.subscribe("hello", this.receiveHello.bind(this));
 
-    this._knownIDs = new Set();
-    this._askForID();
+    this._knownIDs = new Set([0]);
     this._waintingHello = null;
+    this._GUID = btoa(
+      Math.floor(Math.random() * 2147483648).toString(36) +
+      Math.abs(Math.floor(Math.random() * 2147483648)
+        ^ performance.now()).toString(36));
+
+    this._tln.comm.subscribe(this.receiveHello.bind(this));
+
+    if (this._tln.comm.id != 0) {
+      this._preID = this._tln.comm.id;
+      this._forceID();
+    } else {
+      this._askForID();
+    }
+  }
+
+  _schedule(f) {
+    clearTimeout(this._waintingHello);
+    this._waintingHello = setTimeout(f,
+      (this._tln.params.serviceHelloWaitTime * (1.0 + Math.random())) * 1000);
   }
 
   _askForID(forcedID = 0) {
     this._tln.comm.id = 0;
     this._preID = forcedID ||
       (1 + Math.floor(Math.random() * (1 << C.ID_BITS)));
-    this._preGUID = btoa(navigator.userAgent + ":" + performance.now());
-    this._tln.comm.publish({ "hello":
-      { "req": this._preID, "guid": this._preGUID } });
-    clearTimeout(this._waintingHello);
-    this._waintingHello = setTimeout(this._forceID.bind(this),
-      (this._tln.params.serviceHelloWaitTime + 100 * Math.random()) * 1000);
+
+    const m = new proto.Message();
+    const mi = new proto.ServiceId();
+    m.setServiceId(mi);
+    mi.setStatus(proto.ServiceId.Status.REQUEST);
+    mi.setGuid(this._GUID);
+    mi.setRequest(this._preID);
+    this._tln.comm.publish(m);
+    this._schedule(() => this._forceID());
   }
 
   _forceID() {
@@ -30,13 +51,21 @@ export default class ServiceID {
     this._preID = 0;
   }
 
-  receiveHello(pid, payload) {
-    if (payload["guid"] == this._preGUID) return;
-    this._knownIDs.add(pid);
+  receiveHello(msg) {
+    if (!msg.hasServiceId()) return;
+    const mid = msg.getServiceId();
+    // we need to block our own messages before we have IDs.
+    if (mid.getGuid() == this._GUID) return;
+    this._knownIDs.add(msg.getId());
+
+    const res = new proto.Message();
+    const rid = new proto.ServiceId();
+    res.setServiceId(rid);
+    rid.setRequest(mid.getRequest());
 
     if (this._tln.comm.id != 0) {
-      if ("req" in payload) {
-        const req = payload["req"];
+      if (mid.getStatus() == proto.ServiceId.Status.REQUEST) {
+        const req = mid.getRequest();
         if (this._knownIDs.has(req)) {
           let sug = -1;
           for (let i = 0; i < (1 << C.ID_BITS); ++i) {
@@ -45,22 +74,28 @@ export default class ServiceID {
             sug = s;
             break;
           }
-          this._tln.comm.publish({ "hello": { "not": req, "sug": sug }});
+          rid.setStatus(proto.ServiceId.Status.DENIED);
+          rid.setSuggestion(sug);
         } else {
           this._knownIDs.add(req);
-          this._tln.comm.publish({ "hello": { "ok": req }});
+          rid.setStatus(proto.ServiceId.Status.ACCEPT);
         }
+        rid.setRequest(req);
+        this._tln.comm.publish(res);
       }
-    } else {
-      if ("not" in payload && this._preID == payload["not"]) {
-        this._tln.comm.id = 0;
-        this._askForID(payload["sug"]);
-      } else if ("ok" in payload && this._preID == payload["ok"]) {
+    } else if (mid.getRequest() == this._preID) {
+      rid.setGuid(this._GUID);
+      if (mid.getStatus() == proto.ServiceId.Status.DENIED) {
+        this._askForID(mid.getSuggestion());
+      } else if (mid.getStatus() == proto.ServiceId.Status.ACCEPT) {
         this._forceID();
-      } else if ("req" in payload && this._preID == payload["req"]) {
+      } else {
         this._askForID();
-        this._tln.comm.publish({ "hello": { "not": payload["req"] }});
+        rid.setStatus(proto.ServiceId.Status.DENIED);
+        this._tln.comm.publish(res);
       }
+    } else if (mid.getStatus() == proto.ServiceId.Status.REQUEST) {
+      this._schedule(() => this._askForID());
     }
   }
 }

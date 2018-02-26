@@ -10,6 +10,8 @@ export default class CommLocal extends Comm {
   constructor(lag) {
     super();
     this.lag = lag;
+    this.bytes = 0;
+
     pubsub.push(
       (value, d2) => {
         const l = (d2 + this.lag) / 2.0;
@@ -19,8 +21,9 @@ export default class CommLocal extends Comm {
   }
 
   _publish(packet) {
+    this.bytes += packet.length;
     for (const f of pubsub) {
-      f(JSON.parse(JSON.stringify(packet)), this.lag);
+      f(new Uint8Array(packet), this.lag);
     }
   }
 

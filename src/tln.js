@@ -15,6 +15,7 @@ const DEFAULT_PARAMS = {
   commSystem: "local",
   commLocalLag: 0,
   servicesHelloWaitTime: 1.0,
+  forceID: 0,
 };
 
 class TLN {
@@ -27,9 +28,12 @@ class TLN {
     case "local": this.comm = new CommLocal(this.params.commLocalLag);
     }
     return this.comm.done.then(() => {
+      if (this.params.forceID) {
+        this.comm.id = this.params.forceID;
+      }
       this._serviceID = new ServiceID(this);
       this._serviceTime = new ServiceTime(this);
-      this._state = new Timestate(this.comm);
+      // this._state = new Timestate(this.comm);
     });
   }
 }

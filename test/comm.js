@@ -1,48 +1,38 @@
-/* global QUnit tln1 tln2 */
+/* global QUnit tln1 tln2 proto */
 
 QUnit.module("tln.comm", window.hooks, function() {
   QUnit.test("pubsub single", function(assert) {
     assert.expect(0);
     const done = assert.async(1);
 
-    tln2.comm.subscribe("*", (pid, data) => {
-      if (data["PING"]) done();
+    tln2.comm.subscribe(msg => {
+      if (msg.getFieldForTesting() == 123) {
+        done();
+      }
     });
 
-    tln1.comm.publish({PING: true});
+    const r = new proto.Message();
+    r.setFieldForTesting(123);
+    tln1.comm.publish(r);
   });
 
   QUnit.test("pubsub cross", function(assert) {
-    assert.expect(0);
     const done = assert.async(2);
 
-    tln1.comm.subscribe("*", (pid, data) => {
-      if (data["PONG"]) done();
-    });
-    tln2.comm.subscribe("*", (pid, data) => {
-      if (data["PING"]) done();
+    tln1.comm.subscribe(data => {
+      assert.notEqual(data.getFieldForTesting(), 1);
+      if (data.getFieldForTesting() == 2) done();
     });
 
-    tln1.comm.publish({PING: true});
-    tln2.comm.publish({PONG: true});
-  });
-
-  QUnit.test("sub single", function(assert) {
-    const done = assert.async(4);
-
-    tln1.comm.subscribe("a", (pid, data) => {
-      assert.equal(data, "resa");
-      done();
-    });
-    tln1.comm.subscribe("b", (pid, data) => {
-      assert.equal(data, "resb");
-      done();
-    });
-    tln1.comm.subscribe("*", (pid, data) => {
-      if (data["b"] == "resb" || data["a"] == "resa") done();
+    tln2.comm.subscribe(data => {
+      assert.notEqual(data.getFieldForTesting(), 2);
+      if (data.getFieldForTesting() == 1) done();
     });
 
-    tln2.comm.publish({a: "resa"});
-    tln2.comm.publish({b: "resb"});
+    const r = new proto.Message();
+    r.setFieldForTesting(1);
+    tln1.comm.publish(r);
+    r.setFieldForTesting(2);
+    tln2.comm.publish(r);
   });
 });

@@ -22,8 +22,9 @@ window.hooks = {
       servicesHelloWaitTime: 0.1,
     };
     Promise.all([
-      window.tln1.init(par),
-      window.tln2.init(par)]).then(assert.async());
+      window.tln1.init(Object.assign({}, par, {forceID: 1})),
+      window.tln2.init(Object.assign({}, par, {forceID: 2}))])
+      .then(assert.async());
   },
   afterEach: function() {
     if (window.location.href.indexOf("testId") == -1) {
