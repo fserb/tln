@@ -3,12 +3,18 @@ TLN
 
 TODO:
 
-- Timeline (FLOAT/VALUE)
-- comm generate local unique ids
--
+- Timeline (FLOAT/VALUE) tests:
+  - update
+  - priority removal
+  - forward interpolation
+
+- Proxy object that tracks a particular object
+- State logic for timeline syncing
+
+- how to map Timeline ids to Objects?
 
 
-- new entity creation: authoritative, especulative (needs to find a matching
+- new entity creation: authoritative, speculative (needs to find a matching
   authoritative within X time).
   - registry for new entities
   -

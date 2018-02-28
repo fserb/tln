@@ -1,26 +1,19 @@
 // Timeline.js
 
-let TIMELINE_ID = 1;
-
 export default class Timeline extends Function {
-  constructor(interpolation, id) {
+  constructor(tln, interpolation, id) {
     super();
     this.interp = interpolation || Timeline.VALUE;
     if (this.interp != Timeline.VALUE && this.interp != Timeline.FLOAT) {
       throw "Invalid interp: " + interpolation;
     }
-    this.id = id || (TIMELINE_ID++);
+    this.id = id || tln.comm.genNewID();
     this.frames = [];
     this.now = 0;
     this.obj = null;
-
-    return new Proxy(this, {
-      apply: function(target, self, args) {
-        return target.get.apply(target, args);
-      }});
   }
 
-  gc() {
+  _gc() {
     const tf = this._getFrames(Timeline.MASTER);
     if (tf.length >= 5) {
       const mark = tf[tf.length - 5];
@@ -32,7 +25,7 @@ export default class Timeline extends Function {
     if (!this.frames.length) return [];
     const cutoff = this.now - mdelay;
 
-    this.gc();
+    this._gc();
 
     if (this.interp == Timeline.FLOAT) {
       const scratch = this._getFrames(Timeline.SCRATCH);
@@ -64,7 +57,7 @@ export default class Timeline extends Function {
   hostSync() {
     if (!this.frames.length) return [];
 
-    this.gc();
+    this._gc();
 
     if (this.interp == Timeline.FLOAT) {
       const scratch = this._getFrames(Timeline.SCRATCH);
@@ -137,7 +130,7 @@ export default class Timeline extends Function {
       this._removeFrames({prio:Timeline.SCRATCH});
     }
 
-    this.gc();
+    this._gc();
   }
 
   _getFirstFrame(prio) {
@@ -201,7 +194,7 @@ export default class Timeline extends Function {
     time += this.now;
     const tf = prio == null ? this.frames : this._getFrames(prio);
 
-    if (tf.length == 0) return 0;
+    if (tf.length == 0) return this.interp == Timeline.VALUE ? null : 0;
     if (tf.length == 1) return tf[0].value;
 
     // if we are looking for a time before the first value, don't interpolate.

@@ -30,5 +30,6 @@
     "start": "grunt watch",
     "test": "grunt",
     "precommit": "grunt lint"
-  }
+  },
+  "dependencies": {}
 }

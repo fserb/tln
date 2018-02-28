@@ -106,8 +106,8 @@ QUnit.module("tln.service.time", window.hooks, function() {
           assert.ok(Math.abs(delta) < 0.005);
           const p12 = tln1.comm.ping(tln2.comm.id);
           const p21 = tln2.comm.ping(tln1.comm.id);
-          assert.ok(Math.abs(p12 - 0.050) < 0.04);
-          assert.ok(Math.abs(p21 - 0.050) < 0.04);
+          assert.ok(Math.abs(p12 - 0.050) < 0.05);
+          assert.ok(Math.abs(p21 - 0.050) < 0.05);
           const deltaPing = Math.abs(p12 - p21);
           assert.ok(deltaPing < 0.001);
           done();

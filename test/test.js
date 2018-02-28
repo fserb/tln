@@ -88,14 +88,6 @@ if (window.location.href.indexOf("testId") != -1) {
   QUnit.show();
 }
 
-sinon.expectation.fail = sinon.assert.fail = function(msg) {
-  QUnit.assert.ok(false, msg);
-};
-
-sinon.assert.pass = function(assertion) {
-  QUnit.assert.ok(true, assertion);
-};
-
 function delay(t, ...args) {
   return new Promise(function(resolve) {
     setTimeout(resolve.bind(null, ...args), t);
@@ -106,6 +98,14 @@ Promise.prototype.delay = function(t) {
   return this.then(function(...args) {
     return delay(t, ...args);
   });
+};
+
+sinon.expectation.fail = sinon.assert.fail = function(msg) {
+  QUnit.assert.ok(false, msg);
+};
+
+sinon.assert.pass = function(assertion) {
+  QUnit.assert.ok(true, assertion);
 };
 
 sinon.config = {

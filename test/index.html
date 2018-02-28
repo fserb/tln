@@ -12,8 +12,7 @@
   <title>TLN Tests</title>
   <script src="../node_modules/jquery/dist/jquery.min.js"></script>
 
-  <!-- <link rel="stylesheet" href="../node_modules/qunit/qunit/qunit.css"> -->
-  <link rel="stylesheet" href="qunit-theme-light.css">
+  <link rel="stylesheet" href="../node_modules/qunit/qunit/qunit.css">
 </head>
 <body>
   <div id="qunit"></div>
@@ -22,7 +21,8 @@
   <script src="../node_modules/sinon/pkg/sinon.js"></script>
   <script src="../node_modules/protobufjs/dist/minimal/protobuf.js"></script>
 
-  <script src="../out/tln.js"></script>
+
+  <script src="../out/tln.js" data-cover></script>
   <script src="Message_pb.js"></script>
 
   <script src="test.js"></script>
@@ -31,6 +31,8 @@
   <script src="comm.js"></script>
   <script src="service.id.js"></script>
   <script src="service.time.js"></script>
+  <script src="timeline.FLOAT.js"></script>
+  <script src="timeline.VALUE.js"></script>
 
   </body>
 </html>
