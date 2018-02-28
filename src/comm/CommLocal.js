@@ -7,9 +7,9 @@ function delay(avg) {
 }
 
 export default class CommLocal extends Comm {
-  constructor(lag) {
-    super();
-    this.lag = lag;
+  constructor(params) {
+    super(params);
+    this.lag = params.commLocalLag;
     this.bytes = 0;
 
     pubsub.push(

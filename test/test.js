@@ -22,6 +22,7 @@ window.hooks = {
       commSystem: "local",
       commLocalLag: 0,
       servicesHelloWaitTime: 0.1,
+      debug: (window.location.href.indexOf("testId") != -1),
     };
     Promise.all([
       window.tln1.init(Object.assign({}, par, {forceID: 1})),

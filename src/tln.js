@@ -17,6 +17,7 @@ const DEFAULT_PARAMS = {
   commLocalLag: 0,
   servicesHelloWaitTime: 1.0,
   forceID: 0,
+  debug: false,
 };
 
 class TLN {
@@ -29,7 +30,7 @@ class TLN {
 
     this.comm = null;
     switch(this.params.commSystem) {
-    case "local": this.comm = new CommLocal(this.params.commLocalLag);
+    case "local": this.comm = new CommLocal(this.params);
     }
 
     return this.comm.done.then(() => {
@@ -44,7 +45,7 @@ class TLN {
   }
 
   newTimeline(interpolation, id) {
-    return new Timeline(this, interpolation, id);
+    return new Timeline(interpolation, id);
   }
 
   register(name, create, floatFields, valueFields) {

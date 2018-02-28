@@ -6,7 +6,8 @@ import C from "../Consts.js";
 import proto from "../Message_pb.js";
 
 export default class Comm {
-  constructor() {
+  constructor(params) {
+    this._params = params;
     this._subs = [];
     this.id = 0;
     this.done = new Promise((res, _rej) => res());
@@ -53,7 +54,9 @@ export default class Comm {
 
   publish(payload) {
     if (this.id) payload.id = this.id;
-    console.log(this.id + ":", proto.Message.toObject(payload));
+    if (this._params.debug) {
+      console.log(this.id + ":", proto.Message.toObject(payload));
+    }
     this._publish(proto.Message.encode(payload).finish());
   }
 }

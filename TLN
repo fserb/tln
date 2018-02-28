@@ -4,9 +4,8 @@ TLN
 TODO:
 
 - Timeline (FLOAT/VALUE) tests:
-  - update
-  - priority removal
-  - forward interpolation
+  - update with older removal F/V
+  - update forward interpolation F
 
 - Proxy object that tracks a particular object
 - State logic for timeline syncing

@@ -1,13 +1,13 @@
 // Timeline.js
 
 export default class Timeline extends Function {
-  constructor(tln, interpolation, id) {
+  constructor(interpolation, id) {
     super();
     this.interp = interpolation || Timeline.VALUE;
     if (this.interp != Timeline.VALUE && this.interp != Timeline.FLOAT) {
       throw "Invalid interp: " + interpolation;
     }
-    this.id = id || tln.comm.genNewID();
+    this.id = id;
     this.frames = [];
     this.now = 0;
     this.obj = null;
