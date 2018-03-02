@@ -17,6 +17,7 @@
          * @property {number|null} [id] Message id
          * @property {IServiceId|null} [serviceId] Message serviceId
          * @property {IServiceTime|null} [serviceTime] Message serviceTime
+         * @property {Array.<IEvent>|null} [events] Message events
          * @property {number|null} [fieldForTesting] Message fieldForTesting
          */
     
@@ -29,6 +30,7 @@
          * @param {IMessage=} [properties] Properties to set
          */
         function Message(properties) {
+            this.events = [];
             if (properties)
                 for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                     if (properties[keys[i]] != null)
@@ -58,6 +60,14 @@
          * @instance
          */
         Message.prototype.serviceTime = null;
+    
+        /**
+         * Message events.
+         * @member {Array.<IEvent>} events
+         * @memberof Message
+         * @instance
+         */
+        Message.prototype.events = $util.emptyArray;
     
         /**
          * Message fieldForTesting.
@@ -97,6 +107,9 @@
                 $root.ServiceId.encode(message.serviceId, writer.uint32(/* id 2, wireType 2 =*/18).fork()).ldelim();
             if (message.serviceTime != null && message.hasOwnProperty("serviceTime"))
                 $root.ServiceTime.encode(message.serviceTime, writer.uint32(/* id 3, wireType 2 =*/26).fork()).ldelim();
+            if (message.events != null && message.events.length)
+                for (var i = 0; i < message.events.length; ++i)
+                    $root.Event.encode(message.events[i], writer.uint32(/* id 4, wireType 2 =*/34).fork()).ldelim();
             if (message.fieldForTesting != null && message.hasOwnProperty("fieldForTesting"))
                 writer.uint32(/* id 99, wireType 0 =*/792).int32(message.fieldForTesting);
             return writer;
@@ -141,6 +154,11 @@
                     break;
                 case 3:
                     message.serviceTime = $root.ServiceTime.decode(reader, reader.uint32());
+                    break;
+                case 4:
+                    if (!(message.events && message.events.length))
+                        message.events = [];
+                    message.events.push($root.Event.decode(reader, reader.uint32()));
                     break;
                 case 99:
                     message.fieldForTesting = reader.int32();
@@ -193,6 +211,15 @@
                 if (error)
                     return "serviceTime." + error;
             }
+            if (message.events != null && message.hasOwnProperty("events")) {
+                if (!Array.isArray(message.events))
+                    return "events: array expected";
+                for (var i = 0; i < message.events.length; ++i) {
+                    var error = $root.Event.verify(message.events[i]);
+                    if (error)
+                        return "events." + error;
+                }
+            }
             if (message.fieldForTesting != null && message.hasOwnProperty("fieldForTesting"))
                 if (!$util.isInteger(message.fieldForTesting))
                     return "fieldForTesting: integer expected";
@@ -223,6 +250,16 @@
                     throw TypeError(".Message.serviceTime: object expected");
                 message.serviceTime = $root.ServiceTime.fromObject(object.serviceTime);
             }
+            if (object.events) {
+                if (!Array.isArray(object.events))
+                    throw TypeError(".Message.events: array expected");
+                message.events = [];
+                for (var i = 0; i < object.events.length; ++i) {
+                    if (typeof object.events[i] !== "object")
+                        throw TypeError(".Message.events: object expected");
+                    message.events[i] = $root.Event.fromObject(object.events[i]);
+                }
+            }
             if (object.fieldForTesting != null)
                 message.fieldForTesting = object.fieldForTesting | 0;
             return message;
@@ -241,6 +278,8 @@
             if (!options)
                 options = {};
             var object = {};
+            if (options.arrays || options.defaults)
+                object.events = [];
             if (options.defaults) {
                 object.id = 0;
                 object.serviceId = null;
@@ -253,6 +292,11 @@
                 object.serviceId = $root.ServiceId.toObject(message.serviceId, options);
             if (message.serviceTime != null && message.hasOwnProperty("serviceTime"))
                 object.serviceTime = $root.ServiceTime.toObject(message.serviceTime, options);
+            if (message.events && message.events.length) {
+                object.events = [];
+                for (var j = 0; j < message.events.length; ++j)
+                    object.events[j] = $root.Event.toObject(message.events[j], options);
+            }
             if (message.fieldForTesting != null && message.hasOwnProperty("fieldForTesting"))
                 object.fieldForTesting = message.fieldForTesting;
             return object;
@@ -270,6 +314,238 @@
         };
     
         return Message;
+    })();
+    
+    $root.Event = (function() {
+    
+        /**
+         * Properties of an Event.
+         * @exports IEvent
+         * @interface IEvent
+         * @property {number|null} [time] Event time
+         * @property {string|null} [action] Event action
+         * @property {string|null} [args] Event args
+         */
+    
+        /**
+         * Constructs a new Event.
+         * @exports Event
+         * @classdesc Represents an Event.
+         * @implements IEvent
+         * @constructor
+         * @param {IEvent=} [properties] Properties to set
+         */
+        function Event(properties) {
+            if (properties)
+                for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
+                    if (properties[keys[i]] != null)
+                        this[keys[i]] = properties[keys[i]];
+        }
+    
+        /**
+         * Event time.
+         * @member {number} time
+         * @memberof Event
+         * @instance
+         */
+        Event.prototype.time = 0;
+    
+        /**
+         * Event action.
+         * @member {string} action
+         * @memberof Event
+         * @instance
+         */
+        Event.prototype.action = "";
+    
+        /**
+         * Event args.
+         * @member {string} args
+         * @memberof Event
+         * @instance
+         */
+        Event.prototype.args = "";
+    
+        /**
+         * Creates a new Event instance using the specified properties.
+         * @function create
+         * @memberof Event
+         * @static
+         * @param {IEvent=} [properties] Properties to set
+         * @returns {Event} Event instance
+         */
+        Event.create = function create(properties) {
+            return new Event(properties);
+        };
+    
+        /**
+         * Encodes the specified Event message. Does not implicitly {@link Event.verify|verify} messages.
+         * @function encode
+         * @memberof Event
+         * @static
+         * @param {IEvent} message Event message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Event.encode = function encode(message, writer) {
+            if (!writer)
+                writer = $Writer.create();
+            if (message.time != null && message.hasOwnProperty("time"))
+                writer.uint32(/* id 1, wireType 1 =*/9).double(message.time);
+            if (message.action != null && message.hasOwnProperty("action"))
+                writer.uint32(/* id 2, wireType 2 =*/18).string(message.action);
+            if (message.args != null && message.hasOwnProperty("args"))
+                writer.uint32(/* id 3, wireType 2 =*/26).string(message.args);
+            return writer;
+        };
+    
+        /**
+         * Encodes the specified Event message, length delimited. Does not implicitly {@link Event.verify|verify} messages.
+         * @function encodeDelimited
+         * @memberof Event
+         * @static
+         * @param {IEvent} message Event message or plain object to encode
+         * @param {$protobuf.Writer} [writer] Writer to encode to
+         * @returns {$protobuf.Writer} Writer
+         */
+        Event.encodeDelimited = function encodeDelimited(message, writer) {
+            return this.encode(message, writer).ldelim();
+        };
+    
+        /**
+         * Decodes an Event message from the specified reader or buffer.
+         * @function decode
+         * @memberof Event
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @param {number} [length] Message length if known beforehand
+         * @returns {Event} Event
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Event.decode = function decode(reader, length) {
+            if (!(reader instanceof $Reader))
+                reader = $Reader.create(reader);
+            var end = length === undefined ? reader.len : reader.pos + length, message = new $root.Event();
+            while (reader.pos < end) {
+                var tag = reader.uint32();
+                switch (tag >>> 3) {
+                case 1:
+                    message.time = reader.double();
+                    break;
+                case 2:
+                    message.action = reader.string();
+                    break;
+                case 3:
+                    message.args = reader.string();
+                    break;
+                default:
+                    reader.skipType(tag & 7);
+                    break;
+                }
+            }
+            return message;
+        };
+    
+        /**
+         * Decodes an Event message from the specified reader or buffer, length delimited.
+         * @function decodeDelimited
+         * @memberof Event
+         * @static
+         * @param {$protobuf.Reader|Uint8Array} reader Reader or buffer to decode from
+         * @returns {Event} Event
+         * @throws {Error} If the payload is not a reader or valid buffer
+         * @throws {$protobuf.util.ProtocolError} If required fields are missing
+         */
+        Event.decodeDelimited = function decodeDelimited(reader) {
+            if (!(reader instanceof $Reader))
+                reader = new $Reader(reader);
+            return this.decode(reader, reader.uint32());
+        };
+    
+        /**
+         * Verifies an Event message.
+         * @function verify
+         * @memberof Event
+         * @static
+         * @param {Object.<string,*>} message Plain object to verify
+         * @returns {string|null} `null` if valid, otherwise the reason why it is not
+         */
+        Event.verify = function verify(message) {
+            if (typeof message !== "object" || message === null)
+                return "object expected";
+            if (message.time != null && message.hasOwnProperty("time"))
+                if (typeof message.time !== "number")
+                    return "time: number expected";
+            if (message.action != null && message.hasOwnProperty("action"))
+                if (!$util.isString(message.action))
+                    return "action: string expected";
+            if (message.args != null && message.hasOwnProperty("args"))
+                if (!$util.isString(message.args))
+                    return "args: string expected";
+            return null;
+        };
+    
+        /**
+         * Creates an Event message from a plain object. Also converts values to their respective internal types.
+         * @function fromObject
+         * @memberof Event
+         * @static
+         * @param {Object.<string,*>} object Plain object
+         * @returns {Event} Event
+         */
+        Event.fromObject = function fromObject(object) {
+            if (object instanceof $root.Event)
+                return object;
+            var message = new $root.Event();
+            if (object.time != null)
+                message.time = Number(object.time);
+            if (object.action != null)
+                message.action = String(object.action);
+            if (object.args != null)
+                message.args = String(object.args);
+            return message;
+        };
+    
+        /**
+         * Creates a plain object from an Event message. Also converts values to other types if specified.
+         * @function toObject
+         * @memberof Event
+         * @static
+         * @param {Event} message Event
+         * @param {$protobuf.IConversionOptions} [options] Conversion options
+         * @returns {Object.<string,*>} Plain object
+         */
+        Event.toObject = function toObject(message, options) {
+            if (!options)
+                options = {};
+            var object = {};
+            if (options.defaults) {
+                object.time = 0;
+                object.action = "";
+                object.args = "";
+            }
+            if (message.time != null && message.hasOwnProperty("time"))
+                object.time = options.json && !isFinite(message.time) ? String(message.time) : message.time;
+            if (message.action != null && message.hasOwnProperty("action"))
+                object.action = message.action;
+            if (message.args != null && message.hasOwnProperty("args"))
+                object.args = message.args;
+            return object;
+        };
+    
+        /**
+         * Converts this Event to JSON.
+         * @function toJSON
+         * @memberof Event
+         * @instance
+         * @returns {Object.<string,*>} JSON object
+         */
+        Event.prototype.toJSON = function toJSON() {
+            return this.constructor.toObject(this, $protobuf.util.toJSONOptions);
+        };
+    
+        return Event;
     })();
     
     $root.ServiceTime = (function() {

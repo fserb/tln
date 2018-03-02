@@ -16,10 +16,12 @@ QUnit.module("tln.service.time", window.hooks, function() {
           const d2 = tln2.comm._timeDrift;
           assert.notEqual(d1, 0);
           assert.notEqual(d2, 0);
+          console.log(d1, d2);
           assert.ok(Math.abs(d1) < 0.001);
           assert.ok(Math.abs(d2) < 0.001);
           const p12 = tln1.comm.ping(tln2.comm.id);
           const p21 = tln2.comm.ping(tln1.comm.id);
+          console.log(p12, p21, Math.abs(p12 - p21));
           assert.ok(p12 < 0.015);
           assert.ok(p21 < 0.015);
           const deltaPing = Math.abs(p12 - p21);

@@ -3,25 +3,39 @@ TLN
 
 TODO:
 
-- Timeline (FLOAT/VALUE) tests:
-  - update with older removal F/V
-  - update forward interpolation F
+- remove .now from timelines in favor of the actual now of the state.
+- eventQueue: Events received need to get time update
+- eventQueue: addEvent with arguments
+
+- objects are created with all timelines id 0, in a list of "zombie" objects
+- objects have parents:
+  - if parent is in host: add timeline ids, add to event queue with params.
+- when receiving a event queue:
+  - calculate distance from existing zombies, if match, just upgrade zombie.
+- if zombie object is alive for too much time, just kill it.
+- when destroying objects, if hosted, send destroy event. Otherwise don't kill?
+
+- Timeline (FLOAT/VALUE):
+  - replace update/host msg with a Proto
+  - test update with older removal T.F/T.V
+  - test update forward interpolation T.F
+- Subclass Timeline for Float/Value?
 
 - Proxy object that tracks a particular object
 - State logic for timeline syncing
 
-- how to map Timeline ids to Objects?
+- full entity creation sync (for new players)?
 
-
-- new entity creation: authoritative, speculative (needs to find a matching
-  authoritative within X time).
-  - registry for new entities
-  -
-  -
-- full entity creation sync (for new players)
+- master eval loop...
+- time-based master commands.
 
 - commDeepstream
 - commWebRTC (over XMPP?)
+
+- matchmaking solution?
+- mid-game connection / disconnection
+- url matching
+- support for turn based games
 
 WEBRTC:
 - https://github.com/feross/simple-peer

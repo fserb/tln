@@ -8,8 +8,15 @@ message Message {
   ServiceId service_id = 2;
   ServiceTime service_time = 3;
 
+  repeated Event events = 4;
 
   int32 field_for_testing = 99;
+}
+
+message Event {
+  double time = 1;
+  string action = 2;
+  string args = 3;
 }
 
 message ServiceTime {

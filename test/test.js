@@ -37,40 +37,6 @@ window.hooks = {
   }
 };
 
-QUnit.assert.close = function(x, y, msg) {
-  this.pushResult(Math.abs(x - y) < 0.0000001, x, y, msg);
-};
-
-QUnit.assert.deepClose = function(a, b, msg) {
-  const rec = function(x, y) {
-    if (Array.isArray(x) && Array.isArray(y)) {
-      if (x.length != y.length) return false;
-      for (let i = 0; i < x.length; ++i) {
-        if (!rec(x[i], y[i])) return false;
-      }
-    } else if (isFinite(x) && isFinite(y)) {
-      return Math.abs(x - y) < 0.000001;
-    } else if (typeof x == "object" && typeof y == "object") {
-      for (const name in x) {
-        if (!x.hasOwnProperty(name)) continue;
-        if (!y.hasOwnProperty(name)) return false;
-        if (!rec(x[name], y[name])) return false;
-      }
-    }
-    return true;
-  };
-
-  this.pushResult({ result: rec(a, b), actual: a, expected: b, message: msg});
-};
-
-QUnit.assert.closeArray = function(x, y, msg) {
-  let pass = (x.length == y.length);
-  for (let i = 0; i < x.length; ++i) {
-    pass = pass && (Math.abs(x[i] - y[i]) < 0.0000001);
-  }
-  this.pushResult({ result: pass, actual: x, expected: y, message: msg});
-};
-
 QUnit.show = function() {
   $("#qunit-fixture").css({
     height: "auto",

@@ -4,6 +4,7 @@
 
 import Timeline from "./Timeline.js";
 import TimeObject from "./TimeObject.js";
+import EventQueue from "./EventQueue.js";
 // import Timestate from "./Timestate.js";
 
 import ServiceID from "./ServiceID.js";
@@ -40,6 +41,7 @@ class TLN {
       this._serviceID = new ServiceID(this);
       this._serviceTime = new ServiceTime(this);
       this._serviceEntity = new ServiceEntity(this);
+      this._eventQueue = new EventQueue(this);
       // this._state = new Timestate(this.comm);
     });
   }

@@ -1,8 +1,7 @@
 // Timeline.js
 
-export default class Timeline extends Function {
+export default class Timeline {
   constructor(interpolation, id) {
-    super();
     this.interp = interpolation || Timeline.VALUE;
     if (this.interp != Timeline.VALUE && this.interp != Timeline.FLOAT) {
       throw "Invalid interp: " + interpolation;
@@ -166,9 +165,6 @@ export default class Timeline extends Function {
   }
 
   set(time, value, prio = Timeline.SCRATCH) {
-    // if (this.id == 2 && value <= 21) debugger;
-
-    // if (prio != 0 && prio != 10 && prio != 100) debugger;
     if (value === undefined) {
       value = time;
       time = 0;
