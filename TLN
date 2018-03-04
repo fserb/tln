@@ -3,31 +3,25 @@ TLN
 
 TODO:
 
+- move eventQueue inside serviceEntity
+
 - remove .now from timelines in favor of the actual now of the state.
 - eventQueue: Events received need to get time update
-- eventQueue: addEvent with arguments
-
-- objects are created with all timelines id 0, in a list of "zombie" objects
-- objects have parents:
-  - if parent is in host: add timeline ids, add to event queue with params.
-- when receiving a event queue:
-  - calculate distance from existing zombies, if match, just upgrade zombie.
-- if zombie object is alive for too much time, just kill it.
-- when destroying objects, if hosted, send destroy event. Otherwise don't kill?
 
 - Timeline (FLOAT/VALUE):
   - replace update/host msg with a Proto
   - test update with older removal T.F/T.V
   - test update forward interpolation T.F
-- Subclass Timeline for Float/Value?
 
 - Proxy object that tracks a particular object
 - State logic for timeline syncing
+- master eval loop...
 
 - full entity creation sync (for new players)?
 
-- master eval loop...
 - time-based master commands.
+
+- Subclass Timeline for Float/Value?
 
 - commDeepstream
 - commWebRTC (over XMPP?)
@@ -40,3 +34,14 @@ TODO:
 WEBRTC:
 - https://github.com/feross/simple-peer
 - https://deepstreamhub.com/tutorials/protocols/webrtc-datachannels/
+
+
+SAMPLE:
+
+tln.register("ball", ballCreate, ["x","y","vx","vy"], ["color"]);
+
+var b = tln.create(null, "ball", [0, 0, 100, 100, "#FF0000"]);
+
+requestAnimationFrame(dt => {
+
+});

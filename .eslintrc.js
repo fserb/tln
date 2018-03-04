@@ -15,7 +15,7 @@ module.exports = {
     "no-multiple-empty-lines": [ "error", {max: 1} ],
     "no-tabs": [ "error" ],
     "no-trailing-spaces": [ "error" ],
-    "no-underscore-dangle": [ "error", {"allowAfterThis": true, "allowAfterSuper": true}],
+    // "no-underscore-dangle": [ "error", {"allowAfterThis": true, "allowAfterSuper": true}],
     "no-unneeded-ternary": [ "error", { "defaultAssignment": false } ],
     "no-unused-vars": ["error", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}],
     "no-use-before-define": [ "error" ],

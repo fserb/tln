@@ -2,9 +2,12 @@
   "name": "TLN",
   "version": "1.0.0",
   "description": "Timeline Network Library",
-  "main": "index.js",
+  "main": "src/tln.js",
   "author": "Fernando Serboncini <fserb@fserb.com.br>",
   "license": "MIT",
+  "dependencies": {
+    "protobufjs": "^6.8.6"
+  },
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-contrib-uglify-es": "git+https://github.com/gruntjs/grunt-contrib-uglify.git#harmony",
@@ -13,7 +16,6 @@
     "grunt-exec": "^3.0.0",
     "grunt-rollup": "https://github.com/fyrkant/grunt-rollup.git#update-config-options",
     "jquery": "^3.3.1",
-    "protobufjs": "^6.8.6",
     "qunit": "^2.5.0",
     "rollup": "^0.55.1",
     "rollup-plugin-buble": "^0.19.2",
@@ -30,6 +32,5 @@
     "start": "grunt watch",
     "test": "grunt",
     "precommit": "grunt lint"
-  },
-  "dependencies": {}
+  }
 }

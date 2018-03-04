@@ -6,10 +6,10 @@ export default class EventQueue {
     this._added = [];
   }
 
-  addEvent(time, action) {
+  addEvent(time, action, args, ids) {
     let i = 0;
     while (i < this._events.length && this._events[i].time < time) i++;
-    const obj = {time: time, action: action};
+    const obj = {time: time, action: action, args: args, ids: ids};
     this._events.splice(i, 0, obj);
     this._added.push(obj);
   }
@@ -28,7 +28,8 @@ export default class EventQueue {
       const ev = new proto.Event();
       ev.time = o.time - now;
       ev.action = o.action;
-      ev.args = JSON.stringify([]);
+      ev.args = JSON.stringify(o.args);
+      ev.ids = o.ids;
       ret.push(ev);
     }
 
@@ -40,7 +41,7 @@ export default class EventQueue {
     const bk = this._added;
     this._added = [];
     for (const o of pack) {
-      this.addEvent(o.time, o.action);
+      this.addEvent(o.time, o.action, JSON.parse(o.args) || [], o.ids);
     }
     this._added = bk;
   }

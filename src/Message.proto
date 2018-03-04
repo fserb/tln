@@ -6,7 +6,7 @@ message Message {
   int32 id = 1;
 
   ServiceId service_id = 2;
-  ServiceTime service_time = 3;
+  ServiceTime  service_time = 3;
 
   repeated Event events = 4;
 
@@ -17,6 +17,7 @@ message Event {
   double time = 1;
   string action = 2;
   string args = 3;
+  repeated int32 ids = 4;
 }
 
 message ServiceTime {

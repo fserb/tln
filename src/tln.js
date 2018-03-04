@@ -46,6 +46,12 @@ class TLN {
     });
   }
 
+  // returns current time in seconds (high precision), adjusted to
+  // sync with current network.
+  time() {
+    return this.comm._timeDrift + (window.performance.now() / 1000);
+  }
+
   newTimeline(interpolation, id) {
     return new Timeline(interpolation, id);
   }
@@ -54,12 +60,8 @@ class TLN {
     this._serviceEntity.register(name, create, floatFields, valueFields);
   }
 
-  create(name, ...args) {
-    return this._serviceEntity.create(name, ...args);
-  }
-
-  createAndHost(name, ...args) {
-
+  create(parent, name, ...args) {
+    return this._serviceEntity.create(parent, name, ...args);
   }
 
   track(target, floatFields, valueFields) {

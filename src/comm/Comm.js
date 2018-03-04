@@ -16,12 +16,6 @@ export default class Comm {
     this._localIdCount = 1;
   }
 
-  // returns current time in seconds (high precision), adjusted to
-  // sync with current network.
-  time() {
-    return this._timeDrift + (window.performance.now() / 1000);
-  }
-
   // Generate a new id that is unique globally.
   genNewID() {
     return ((this._localIdCount++) << C.ID_BITS) | this.id;

@@ -9,7 +9,6 @@ export default class Timeline {
     this.id = id;
     this.frames = [];
     this.now = 0;
-    this.obj = null;
   }
 
   _gc() {

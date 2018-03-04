@@ -324,6 +324,7 @@ export const Event = $root.Event = (() => {
      * @property {number|null} [time] Event time
      * @property {string|null} [action] Event action
      * @property {string|null} [args] Event args
+     * @property {Array.<number>|null} [ids] Event ids
      */
 
     /**
@@ -335,6 +336,7 @@ export const Event = $root.Event = (() => {
      * @param {IEvent=} [properties] Properties to set
      */
     function Event(properties) {
+        this.ids = [];
         if (properties)
             for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -366,6 +368,14 @@ export const Event = $root.Event = (() => {
     Event.prototype.args = "";
 
     /**
+     * Event ids.
+     * @member {Array.<number>} ids
+     * @memberof Event
+     * @instance
+     */
+    Event.prototype.ids = $util.emptyArray;
+
+    /**
      * Creates a new Event instance using the specified properties.
      * @function create
      * @memberof Event
@@ -395,6 +405,12 @@ export const Event = $root.Event = (() => {
             writer.uint32(/* id 2, wireType 2 =*/18).string(message.action);
         if (message.args != null && message.hasOwnProperty("args"))
             writer.uint32(/* id 3, wireType 2 =*/26).string(message.args);
+        if (message.ids != null && message.ids.length) {
+            writer.uint32(/* id 4, wireType 2 =*/34).fork();
+            for (let i = 0; i < message.ids.length; ++i)
+                writer.int32(message.ids[i]);
+            writer.ldelim();
+        }
         return writer;
     };
 
@@ -437,6 +453,16 @@ export const Event = $root.Event = (() => {
                 break;
             case 3:
                 message.args = reader.string();
+                break;
+            case 4:
+                if (!(message.ids && message.ids.length))
+                    message.ids = [];
+                if ((tag & 7) === 2) {
+                    let end2 = reader.uint32() + reader.pos;
+                    while (reader.pos < end2)
+                        message.ids.push(reader.int32());
+                } else
+                    message.ids.push(reader.int32());
                 break;
             default:
                 reader.skipType(tag & 7);
@@ -482,6 +508,13 @@ export const Event = $root.Event = (() => {
         if (message.args != null && message.hasOwnProperty("args"))
             if (!$util.isString(message.args))
                 return "args: string expected";
+        if (message.ids != null && message.hasOwnProperty("ids")) {
+            if (!Array.isArray(message.ids))
+                return "ids: array expected";
+            for (let i = 0; i < message.ids.length; ++i)
+                if (!$util.isInteger(message.ids[i]))
+                    return "ids: integer[] expected";
+        }
         return null;
     };
 
@@ -503,6 +536,13 @@ export const Event = $root.Event = (() => {
             message.action = String(object.action);
         if (object.args != null)
             message.args = String(object.args);
+        if (object.ids) {
+            if (!Array.isArray(object.ids))
+                throw TypeError(".Event.ids: array expected");
+            message.ids = [];
+            for (let i = 0; i < object.ids.length; ++i)
+                message.ids[i] = object.ids[i] | 0;
+        }
         return message;
     };
 
@@ -519,6 +559,8 @@ export const Event = $root.Event = (() => {
         if (!options)
             options = {};
         let object = {};
+        if (options.arrays || options.defaults)
+            object.ids = [];
         if (options.defaults) {
             object.time = 0;
             object.action = "";
@@ -530,6 +572,11 @@ export const Event = $root.Event = (() => {
             object.action = message.action;
         if (message.args != null && message.hasOwnProperty("args"))
             object.args = message.args;
+        if (message.ids && message.ids.length) {
+            object.ids = [];
+            for (let j = 0; j < message.ids.length; ++j)
+                object.ids[j] = message.ids[j];
+        }
         return object;
     };
 

@@ -54,7 +54,7 @@ export default class ServiceTime {
   appendTime(msg) {
     const real = this.realTime();
     msg.serviceTime = new proto.ServiceTime();
-    msg.serviceTime.now = this._tln.comm.time();
+    msg.serviceTime.now = this._tln.time();
     msg.serviceTime.real = real;
 
     for (const p of this.pending) {
@@ -72,7 +72,7 @@ export default class ServiceTime {
   receiveTime(msg) {
     if (!msg.serviceTime) return;
     const st = msg.serviceTime;
-    const now = this._tln.comm.time();
+    const now = this._tln.time();
     const real = this.realTime();
     const pid = msg.id;
     this.pending.push({from: pid, orig: st.real, received: real});
