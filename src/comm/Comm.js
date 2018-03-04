@@ -49,6 +49,7 @@ export default class Comm {
   publish(payload) {
     if (this.id) payload.id = this.id;
     if (this._params.debug) {
+      // eslint-disable-next-line no-console
       console.log(this.id + ":", proto.Message.toObject(payload));
     }
     this._publish(proto.Message.encode(payload).finish());

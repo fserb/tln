@@ -64,5 +64,4 @@ QUnit.module("eventqueue", window.hooks, function() {
 
     assert.propEqual(tln2._eventQueue.sync(0), []);
   });
-
 });
